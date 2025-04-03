@@ -47,7 +47,7 @@ export default function DashboardPage() {
             <div className="bg-primary text-primary-foreground p-1 rounded">
               <Package className="h-5 w-5" />
             </div>
-            <span>CleanPress</span>
+            <span>Smart Laundry</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
               <div className="bg-primary text-primary-foreground p-1 rounded">
                 <Package className="h-5 w-5" />
               </div>
-              <span>CleanPress</span>
+              <span>Smart Laundry</span>
             </Link>
           </div>
           <nav className="flex-1 overflow-y-auto py-6 px-4">

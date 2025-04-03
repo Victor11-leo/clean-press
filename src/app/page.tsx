@@ -16,7 +16,7 @@ export default function Home() {
             <div className="bg-primary text-primary-foreground p-1 rounded">
               <Package className="h-6 w-6" />
             </div>
-            <span>CleanPress</span>
+            <span>Smart Laundry</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary">
@@ -121,7 +121,7 @@ export default function Home() {
                 <div className="bg-primary text-primary-foreground p-1 rounded">
                   <Package className="h-6 w-6" />
                 </div>
-                <span>CleanPress</span>
+                <span>Smart Laundry</span>
               </div>
               <p className="text-muted-foreground text-sm">
                 Making laundry day a breeze with our convenient pickup and delivery service.
@@ -182,7 +182,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} CleanPress. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Smart Laundry. All rights reserved.</p>
           </div>
         </div>
       </footer>
