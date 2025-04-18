@@ -6,17 +6,21 @@ import FeatureCard from "@/components/global/feature-card"
 import HowItWorks from "@/components/global/how-it-works"
 import TestimonialSection from "@/components/global/testimonial-section"
 import PricingSection from "@/components/global/pricing-section"
+import { auth } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
-export default function Home() {
+const Home = async () =>  {
+  const { userId} = await auth()
+  // if (userId) redirect('/dashboard')
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b sticky top-0 z-50 bg-background">
+      <header className="border-b sticky top-0 z-50 bg-background px-8">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
             <div className="bg-primary text-primary-foreground p-1 rounded">
               <Package className="h-6 w-6" />
             </div>
-            <span>Smart Laundry</span>
+            <span>Usafi Bora</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-sm font-medium hover:text-primary">
@@ -32,20 +36,11 @@ export default function Home() {
               Pricing
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Log In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Sign Up</Button>
-            </Link>
-          </div>
+          
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 max-w-5xl mx-auto px-4">
         <HeroSection />
 
         <section id="features" className="py-20 bg-muted/50">
@@ -190,3 +185,4 @@ export default function Home() {
   )
 }
 
+export default Home

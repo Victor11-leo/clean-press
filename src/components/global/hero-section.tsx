@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { SignInButton } from "@clerk/nextjs"
 
 export default function HeroSection() {
   return (
@@ -14,12 +15,12 @@ export default function HeroSection() {
             <p className="text-xl text-muted-foreground mb-8">
               Schedule pickups, track your laundry in real-time, and get it delivered fresh and clean to your doorstep.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
+            <div className="flex flex-col sm:flex-row gap-4">              
+              <SignInButton>
                 <Button size="lg" className="gap-2 w-full sm:w-auto">
                   Get Started <ArrowRight className="h-4 w-4" />
                 </Button>
-              </Link>
+              </SignInButton>
               <Link href="#how-it-works">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   How It Works

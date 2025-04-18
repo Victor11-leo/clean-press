@@ -27,8 +27,10 @@ import {
 import DashboardHeader from "@/components/global/dashboard/dashboard-header"
 import OrderCard from "@/components/global/dashboard/order-card"
 import BookingForm from "@/components/global/dashboard/booking-form"
+import { SignOutButton, useUser } from "@clerk/nextjs"
 
 export default function DashboardPage() {
+  const {user} = useUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const toggleSidebar = () => {
@@ -47,7 +49,7 @@ export default function DashboardPage() {
             <div className="bg-primary text-primary-foreground p-1 rounded">
               <Package className="h-5 w-5" />
             </div>
-            <span>Smart Laundry</span>
+            <span>Usafi Bora</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
@@ -55,8 +57,8 @@ export default function DashboardPage() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
             </Button>
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={user?.imageUrl} alt="User" />
+              <AvatarFallback>{user?.firstName}</AvatarFallback>
             </Avatar>
           </div>
         </div>
@@ -70,13 +72,13 @@ export default function DashboardPage() {
           md:translate-x-0 md:static md:h-screen
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full relative">
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl">
               <div className="bg-primary text-primary-foreground p-1 rounded">
                 <Package className="h-5 w-5" />
               </div>
-              <span>Smart Laundry</span>
+              <span>Usafi Bora</span>
             </Link>
           </div>
           <nav className="flex-1 overflow-y-auto py-6 px-4">
@@ -105,28 +107,11 @@ export default function DashboardPage() {
                   Subscription
                 </Button>
               </Link>
-              <Link href="/dashboard/support">
-                <Button variant="ghost" className="w-full justify-start gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Support
-                </Button>
-              </Link>
+              
             </div>
-            <div className="mt-6 pt-6 border-t">
-              <div className="space-y-1">
-                <Link href="/dashboard/profile">
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <User className="h-5 w-5" />
-                    Profile
-                  </Button>
-                </Link>
-                <Link href="/dashboard/settings">
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <Settings className="h-5 w-5" />
-                    Settings
-                  </Button>
-                </Link>
-                <Link href="/logout">
+            <div className="mt-6 pt-6 border-t absolute bottom-2">
+              <div className="space-y-1">                
+                <SignOutButton>
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -134,32 +119,17 @@ export default function DashboardPage() {
                     <LogOut className="h-5 w-5" />
                     Logout
                   </Button>
-                </Link>
+                </SignOutButton>
+                
               </div>
             </div>
           </nav>
-          <div className="p-4 border-t">
-            <div className="bg-muted rounded-lg p-4">
-              <div className="flex items-center gap-4 mb-3">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">John Doe</p>
-                  <p className="text-sm text-muted-foreground">Free Plan</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Upgrade Plan
-              </Button>
-            </div>
-          </div>
+          
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto px-4">
         <DashboardHeader />
 
         <div className="container py-6">
@@ -168,6 +138,7 @@ export default function DashboardPage() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="book">Book Pickup</TabsTrigger>
               <TabsTrigger value="orders">My Orders</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">

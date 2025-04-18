@@ -14,20 +14,60 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { CalendarIcon, Check } from "lucide-react"
+import {useMutation} from 'convex/react'
+import { api } from "../../../../convex/_generated/api"
+import { useUser } from "@clerk/nextjs"
 
 export default function BookingForm() {
+  const createBooking = useMutation(api.order.createTask)
+  const {user} = useUser()
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const [address,setAddress] = useState('home')
+  const [pickupDate,setPickupDate] = useState('')
+  const [pickupTime,setPickupTime] = useState('')
+  const [serviceType,setServiceType] = useState('standard')
+  const [laundryPreference,setLaundryPreference] = useState([''])
+  const [specialInstruction,setSpecialInstruction] = useState('')
+  const [shirts,setShirts] = useState(0)
+  const [pants,setPants] = useState(0)
+  const [dresses,setDresses] = useState(0)
+  const [bedding,setBedding] = useState(0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
+    const bookingDetails = {
+      userId:user?.id,
+      address,
+      pickupDate:date?.toString(),
+      pickupTime,
+      serviceType,
+      laundryPreference,
+      specialInstruction,
+      status:'pending',
+      shirts,
+      pants,
+      dresses,
+      bedding,
+    }
+    console.log(bookingDetails);
     // Simulate API call
-    setTimeout(() => {
+    // setTimeout(() => {
+    //   setIsSubmitting(false)
+    //   alert("Booking successful! We'll see you soon.")
+    // }, 1500)
+
+    try {
+      createBooking(bookingDetails)
       setIsSubmitting(false)
-      alert("Booking successful! We'll see you soon.")
-    }, 1500)
+      console.log('booking success');
+    } catch (error) {
+      console.log(error?.message);
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -35,7 +75,10 @@ export default function BookingForm() {
       <div className="space-y-4">
         <div>
           <Label htmlFor="address">Pickup Address</Label>
-          <Select defaultValue="home">
+          <Select 
+          defaultValue={address}
+          onValueChange={(value) => setAddress(value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select address" />
             </SelectTrigger>
@@ -65,7 +108,9 @@ export default function BookingForm() {
 
           <div className="space-y-2">
             <Label>Pickup Time</Label>
-            <Select defaultValue="afternoon">
+            <Select 
+            onValueChange={(value) => setPickupTime(value)}
+            defaultValue="afternoon">
               <SelectTrigger>
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>
@@ -80,7 +125,9 @@ export default function BookingForm() {
 
         <div className="space-y-2">
           <Label>Service Type</Label>
-          <RadioGroup defaultValue="standard" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <RadioGroup 
+          onValueChange={(value) => setServiceType(value)}
+          defaultValue={serviceType} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center space-x-2 border rounded-md p-3 cursor-pointer hover:bg-muted/50">
               <RadioGroupItem value="standard" id="standard" />
               <Label htmlFor="standard" className="cursor-pointer flex-1">
@@ -109,25 +156,33 @@ export default function BookingForm() {
           <Label>Laundry Preferences</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex items-center space-x-2">
-              <Checkbox id="fabric-softener" />
+              <Checkbox                
+              onCheckedChange={() => setLaundryPreference(prev => [...prev,'fabric-softener'])}             
+              id="fabric-softener" />
               <Label htmlFor="fabric-softener" className="font-normal">
                 Use fabric softener
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="eco-friendly" />
+              <Checkbox 
+              onCheckedChange={() => setLaundryPreference(prev => [...prev,'eco-friendly'])}
+              id="eco-friendly" />
               <Label htmlFor="eco-friendly" className="font-normal">
                 Eco-friendly detergent
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="extra-starch" />
+              <Checkbox 
+              onCheckedChange={() => setLaundryPreference(prev => [...prev,'extra-starch'])}
+              id="extra-starch" />
               <Label htmlFor="extra-starch" className="font-normal">
                 Extra starch for shirts
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="hang-dry" />
+              <Checkbox 
+              onCheckedChange={() => setLaundryPreference(prev => [...prev,'hang-dry'])}
+              id="hang-dry" />
               <Label htmlFor="hang-dry" className="font-normal">
                 Hang dry delicates
               </Label>
@@ -138,6 +193,7 @@ export default function BookingForm() {
         <div className="space-y-2">
           <Label htmlFor="special-instructions">Special Instructions</Label>
           <Textarea
+            onChange={(e) => setSpecialInstruction(e.target.value)}
             id="special-instructions"
             placeholder="Any special instructions for handling your laundry..."
             className="resize-none"
@@ -152,25 +208,33 @@ export default function BookingForm() {
               <Label htmlFor="shirts" className="text-sm">
                 Shirts
               </Label>
-              <Input id="shirts" type="number" min="0" defaultValue="0" />
+              <Input 
+              onChange={(e) => setShirts(Number(e.target.value))}
+              id="shirts" type="number" min="0" defaultValue="0" />
             </div>
             <div>
               <Label htmlFor="pants" className="text-sm">
                 Pants
               </Label>
-              <Input id="pants" type="number" min="0" defaultValue="0" />
+              <Input 
+              onChange={(e) => setPants(Number(e.target.value))}
+              id="pants" type="number" min="0" defaultValue="0" />
             </div>
             <div>
               <Label htmlFor="dresses" className="text-sm">
                 Dresses
               </Label>
-              <Input id="dresses" type="number" min="0" defaultValue="0" />
+              <Input 
+              onChange={(e) => setDresses(Number(e.target.value))}
+              id="dresses" type="number" min="0" defaultValue="0" />
             </div>
             <div>
               <Label htmlFor="bedding" className="text-sm">
                 Bedding
               </Label>
-              <Input id="bedding" type="number" min="0" defaultValue="0" />
+              <Input 
+              onChange={(e) => setBedding(Number(e.target.value))}
+              id="bedding" type="number" min="0" defaultValue="0" />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-2">

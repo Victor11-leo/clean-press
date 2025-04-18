@@ -1,8 +1,13 @@
+'use client'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { useUser } from "@clerk/nextjs"
 import { Bell, Search } from "lucide-react"
+import { redirect } from "next/navigation"
 
-export default function DashboardHeader() {
+const DashboardHeader = () => {
+  const {user} = useUser()
+  // if (!user) redirect('/')
   return (
     <header className="hidden md:block border-b bg-background sticky top-0 z-20">
       <div className="container flex h-16 items-center justify-between">
@@ -21,12 +26,12 @@ export default function DashboardHeader() {
           </Button>
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={user?.imageUrl} alt="User" />
+              <AvatarFallback>{user?.firstName}</AvatarFallback>
             </Avatar>
             <div className="hidden md:block">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-muted-foreground">john@example.com</p>
+              <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+              <p className="text-xs text-muted-foreground">{user?.emailAddresses[0].emailAddress}</p>
             </div>
           </div>
         </div>
@@ -35,3 +40,4 @@ export default function DashboardHeader() {
   )
 }
 
+export default DashboardHeader
