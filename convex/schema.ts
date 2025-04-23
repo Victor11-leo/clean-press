@@ -4,6 +4,7 @@ import { v } from "convex/values";
 export default defineSchema({
   order: defineTable({
     userId: v.string(),
+    orderId: v.string(),
     address: v.string(),
     pickupDate: v.string(),
     pickupTime: v.string(),
@@ -23,7 +24,7 @@ export default defineSchema({
     pants: v.optional(v.number()),
     dresses: v.optional(v.number()),
     bedding: v.optional(v.number()),
-  }),  
+  }).index("by_userId",['userId']),  
   pickUp:defineTable({
     userId: v.string(),
     pickupDate: v.string(),

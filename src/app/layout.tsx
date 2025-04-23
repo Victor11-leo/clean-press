@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Laundry",
+  title: "Usafi Bora",
   description: "Make your laundry experience seamless and hassle-free",
 };
 

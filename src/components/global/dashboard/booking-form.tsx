@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,16 +13,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { CalendarIcon, Check } from "lucide-react"
+import { CalendarIcon, Check, MapPin, Search } from "lucide-react"
 import {useMutation} from 'convex/react'
 import { api } from "../../../../convex/_generated/api"
 import { useUser } from "@clerk/nextjs"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+let DefaultIcon = L.icon({
+    iconUrl,
+    shadowUrl: iconShadow
+  });
+  L.Marker.prototype.options.icon = DefaultIcon;
+  
+  const ChangeMapView = ({ coords }) => {
+    const map = useMap();
+    map.setView(coords, 16);
+    return null;
+  };
 
 export default function BookingForm() {
   const createBooking = useMutation(api.order.createTask)
   const {user} = useUser()
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [typeAddress, setTypeAddress] = useState(false)
   
   const [address,setAddress] = useState('home')
   const [pickupDate,setPickupDate] = useState('')
@@ -35,13 +65,42 @@ export default function BookingForm() {
   const [dresses,setDresses] = useState(0)
   const [bedding,setBedding] = useState(0)
 
+  const [coords, setCoords] = useState([-1.286389, 36.817223]); // default Nairobi
+  const [placeName, setPlaceName] = useState("");
+
+  function generateCode() {
+    const year = new Date().getFullYear();         // e.g., 2025
+    const random = Math.floor(1000 + Math.random() * 9000); // random 4-digit number
+    return `${year}-${random}`;
+  }
+
+
+  const handleSearch = async () => {
+    if (!address) return;
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        address
+      )}`
+    );
+    const data = await res.json();
+    if (data.length > 0) {
+      const { lat, lon, display_name } = data[0];
+      setCoords([parseFloat(lat), parseFloat(lon)]);
+      setPlaceName(display_name);
+    } else {
+      alert("Address not found");
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    const orderId = generateCode()
 
     const bookingDetails = {
       userId:user?.id,
-      address,
+      orderId,
+      address:coords,
       pickupDate:date?.toString(),
       pickupTime,
       serviceType,
@@ -53,12 +112,7 @@ export default function BookingForm() {
       dresses,
       bedding,
     }
-    console.log(bookingDetails);
-    // Simulate API call
-    // setTimeout(() => {
-    //   setIsSubmitting(false)
-    //   alert("Booking successful! We'll see you soon.")
-    // }, 1500)
+    console.log(bookingDetails);    
 
     try {
       createBooking(bookingDetails)
@@ -69,12 +123,48 @@ export default function BookingForm() {
       setIsSubmitting(false)
     }
   }
-
+  console.log(placeName);
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="address">Pickup Address</Label>
+          {/* <Label htmlFor="address">Pickup Address</Label>
+          <Button onClick={() => setTypeAddress(true)} variant='outline' className="w-full justify-start">            
+            {placeName.length > 1 ?
+            <p>{placeName}</p>
+            :
+            <>
+            <MapPin/>
+            Enter address
+            </>
+            }
+          </Button>
+          <Dialog open={typeAddress} onOpenChange={setTypeAddress}>
+            <DialogTrigger>Open</DialogTrigger>
+            <DialogContent className="flex flex-col gap-2 p-2">
+              <div className="flex items-center gap-2">
+                <Input
+                placeholder="Type address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                id="coords" type="string" 
+                />
+                <Button onClick={handleSearch} className="rounded-full">
+                  <Search/>
+                </Button>
+              </div>
+              <MapContainer center={coords} zoom={13} style={{ height: "400px", marginTop: "20px" }}>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={coords}>
+                  <Popup>{placeName || "Selected location"}</Popup>
+                </Marker>
+                <ChangeMapView coords={coords} />
+              </MapContainer>
+            </DialogContent>
+          </Dialog> */}
+
           <Select 
           defaultValue={address}
           onValueChange={(value) => setAddress(value)}

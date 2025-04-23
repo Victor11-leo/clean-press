@@ -1,9 +1,10 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const createTask = mutation({
   args: {
     userId: v.string(),
+    orderId: v.string(),
     address: v.string(),
     pickupDate: v.string(),
     pickupTime: v.string(),
@@ -27,6 +28,7 @@ export const createTask = mutation({
   handler: async (ctx, args) => {
     const res = await ctx.db.insert("order",{
         userId:args.userId,
+        orderId:args.orderId,
         address:args.address,
         pickupDate:args.pickupDate,
         pickupTime:args.pickupTime,
@@ -62,11 +64,42 @@ export const updateTask = mutation({
         status: args.status 
         });      
     },
-  });
+});
 
-  export const deleteTask = mutation({
-    args: { id: v.id("order") },
-    handler: async (ctx, args) => {
-      await ctx.db.delete(args.id);
-    },
-  });
+export const deleteTask = mutation({
+  args: { id: v.id("order") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});
+
+export const fetchTasksByUserId = query({
+  args:{userId:v.string()},
+  handler :async(ctx,args) => {
+    const res = await ctx.db
+    .query('order')
+    .withIndex("by_userId",(q) => q.eq("userId",args.userId))
+    .collect()
+
+    return res
+  }
+})
+
+export const fetchTasksId = query({
+  args:{id:v.id("order")},
+  handler :async(ctx,args) => {
+    const res = await ctx.db.get(args.id)    
+    return res
+  }
+})
+
+export const fetchTasks = query({
+  args:{},
+  handler :async(ctx,args) => {
+    const res = await ctx.db
+    .query('order')    
+    .collect()
+
+    return res
+  }
+})

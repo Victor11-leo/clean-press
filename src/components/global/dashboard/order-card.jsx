@@ -3,20 +3,37 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Check, Clock, Shirt, Truck } from "lucide-react"
 
-interface OrderItem {
-  name: string
-  quantity: number
-}
+// interface OrderItem {
+//   name: string
+//   quantity: number
+// }
 
-interface OrderCardProps {
-  orderNumber: string
-  date: string
-  status: string
-  items: OrderItem[]
-  statusStep: number // 1: Picked Up, 2: In Cleaning, 3: Ready for Delivery, 4: Delivered
-}
+// interface OrderCardProps {
+//   orderNumber: string
+//   date: string
+//   status: string
+//   items: OrderItem[]
+//   statusStep: number // 1: Picked Up, 2: In Cleaning, 3: Ready for Delivery, 4: Delivered
+// }
 
-export default function OrderCard({ orderNumber, date, status, items, statusStep }: OrderCardProps) {
+export default function OrderCard({ orderNumber, date, status, items, statusStep }) {
+  function getOrderStatusValue(status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return 0;
+      case "picked-up":
+        return 1;
+      case "cleaning":
+        return 2;
+      case "ready for delivery":
+        return 3;
+      case "delivered":
+        return 4;
+      default:
+        return -1; // in case the status doesn't match any expected ones
+    }
+  }
+
   const getStatusColor = () => {
     switch (status) {
       case "Completed":
@@ -37,6 +54,8 @@ export default function OrderCard({ orderNumber, date, status, items, statusStep
     { label: "Delivered", icon: <Check className="h-4 w-4" /> },
   ]
 
+  const statusStepValue = getOrderStatusValue(status)
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
@@ -51,7 +70,7 @@ export default function OrderCard({ orderNumber, date, status, items, statusStep
 
           <div className="flex flex-wrap gap-2 mb-4">
             {items.map((item, index) => (
-              <div key={index} className="text-xs bg-muted px-2 py-1 rounded-md">
+              <div key={index} className={`text-xs bg-muted px-2 py-1 rounded-md ${item.quantity < 1 && 'hidden'}`}>
                 {item.quantity}x {item.name}
               </div>
             ))}
@@ -73,7 +92,7 @@ export default function OrderCard({ orderNumber, date, status, items, statusStep
                 <div className="h-1 bg-muted rounded-full w-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full"
-                    style={{ width: `${(statusStep / steps.length) * 100}%` }}
+                    style={{ width: `${(statusStepValue / steps.length) * 100}%` }}
                   ></div>
                 </div>
               </div>
