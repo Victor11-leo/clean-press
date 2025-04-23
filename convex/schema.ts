@@ -4,7 +4,7 @@ import { v } from "convex/values";
 export default defineSchema({
   order: defineTable({
     userId: v.string(),
-    orderId: v.string(),
+    orderId: v.optional(v.string()),
     address: v.string(),
     pickupDate: v.string(),
     pickupTime: v.string(),

@@ -21,10 +21,10 @@ export const completeOnboarding = async (formData: FormData) => {
         plan
       },
     })
-    // const pay = await handlePayment({
-    //     phone:phoneNo,
-    //     amount:1
-    // })
+    const pay = await handlePayment({
+        phone:phoneNo,
+        amount:1
+    })
     return { message: res.publicMetadata}
   } catch (err) {
     return { error: 'There was an error updating the user metadata.' }

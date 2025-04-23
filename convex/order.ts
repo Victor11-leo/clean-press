@@ -4,7 +4,7 @@ import { v } from "convex/values";
 export const createTask = mutation({
   args: {
     userId: v.string(),
-    orderId: v.string(),
+    orderId: v.optional(v.string()),
     address: v.string(),
     pickupDate: v.string(),
     pickupTime: v.string(),

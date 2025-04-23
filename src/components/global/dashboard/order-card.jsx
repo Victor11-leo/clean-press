@@ -98,15 +98,7 @@ export default function OrderCard({ orderNumber, date, status, items, statusStep
               </div>
             </div>
           </div>
-
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="flex-1">
-              Track Order
-            </Button>
-            <Button size="sm" variant="outline" className="flex-1">
-              Contact Support
-            </Button>
-          </div>
+          
         </div>
       </CardContent>
     </Card>
