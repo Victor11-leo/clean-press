@@ -23,9 +23,9 @@ export default function OrderCard({ orderNumber, date, status, items, statusStep
         return 0;
       case "picked-up":
         return 1;
-      case "cleaning":
+      case "in-cleaning":
         return 2;
-      case "ready for delivery":
+      case "ready-delivery":
         return 3;
       case "delivered":
         return 4;

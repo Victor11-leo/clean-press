@@ -6,7 +6,7 @@ import RiderDashboard from '@/components/pages/rider/page'
 import { useUser } from '@clerk/nextjs'
 
 const page = () => {
-  const {user} = useUser()
+  // const {user} = useUser()
   // const role = user?.publicMetadata?.role
   const role = "user"
   

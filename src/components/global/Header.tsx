@@ -2,7 +2,7 @@
 import { Bell, LogOut, Package } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/button'
-import { SignOutButton, useUser } from '@clerk/nextjs'
+import { SignOutButton, UserButton, useUser } from '@clerk/nextjs'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
 const Header = () => {
@@ -31,10 +31,7 @@ const Header = () => {
                     </Button>
                 </SignOutButton>                
                 </div>
-            <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.imageUrl} alt="User" />
-                <AvatarFallback>{user?.firstName}</AvatarFallback>
-            </Avatar>
+            <UserButton/>
             </div>
         </div>
         </header>

@@ -1,9 +1,21 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Phone, Clock, Package, CreditCard } from "lucide-react"
+import { MapPin, Phone, Clock, Package, CreditCard, Ellipsis } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useMutation } from "convex/react"
+import { api } from "../../../convex/_generated/api"
+import { toast } from "sonner"
 
 interface DeliveryCardProps {
+  order_id: string
   orderId: string
   customerName: string
   address: string
@@ -16,6 +28,7 @@ interface DeliveryCardProps {
 }
 
 export default function DeliveryCard({
+  order_id,
   orderId,
   customerName,
   address,
@@ -41,6 +54,7 @@ export default function DeliveryCard({
     }
   }
 
+  const updateOrder = useMutation(api.order.updateTask)
   return (
     <Card>
       <CardContent className="p-4">
@@ -75,12 +89,52 @@ export default function DeliveryCard({
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button className="flex-1 gap-1" size="sm">
-            <MapPin className="h-4 w-4" /> Navigate
-          </Button>
+        <div className="flex gap-2">          
           <Button className="flex-1 gap-1" size="sm" variant="outline">
-            <Phone className="h-4 w-4" /> Call
+
+            <DropdownMenu>
+            <DropdownMenuTrigger><Ellipsis/></DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+              onClick={() => {
+                updateOrder({
+                  id:order_id,
+                  status:"picked-up"
+                })
+                toast.success("Picked Up")
+              }}>
+                Picked Up</DropdownMenuItem>
+              <DropdownMenuItem
+              onClick={() => {
+                updateOrder({
+                  id:order_id,
+                  status:"in-cleaning"
+                })
+                toast.success("In Cleaning")
+              }}
+              >In Cleaning</DropdownMenuItem>
+              <DropdownMenuItem
+              onClick={() => {
+                updateOrder({
+                  id:order_id,
+                  status:"ready-delivery"
+                })
+                toast.success("Ready Deliver")
+              }}
+              >Ready 4 Delivery</DropdownMenuItem>
+              <DropdownMenuItem
+              onClick={() => {
+                updateOrder({
+                  id:order_id,
+                  status:"delivered"
+                })
+                toast.success("Delivered")
+              }}
+              >Delivered</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           </Button>
         </div>
       </CardContent>

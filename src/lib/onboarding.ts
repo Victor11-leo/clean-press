@@ -33,7 +33,7 @@ export const completeOnboarding = async (formData: FormData) => {
 
 
 
-const handlePayment = async ({phone,amount}) => {
+export const handlePayment = async ({phone,amount}) => {
   try {    
     const formattedPhone = phone.substring(1)
     
@@ -82,7 +82,7 @@ const handlePayment = async ({phone,amount}) => {
         PartyA: `254${formattedPhone}`,
         PartyB: shortcode,
         PhoneNumber: `254${formattedPhone}`,
-        CallBackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/`,
+        CallBackURL: `https://yourdomain.com/api/mpesa/callback`,
         AccountReference: "ArdhiKwanza",
         TransactionDesc: "Payment for services",
       },

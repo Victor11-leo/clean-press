@@ -1,3 +1,4 @@
+'use client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,11 +10,65 @@ import Header from "@/components/global/Header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import RiderDeliveries from './deliveries/page'
-import RiderMap from './map/page'
 import RiderPickups from './pickups/page'
 import RiderProfile from './profile/page'
+import { useQuery } from "convex/react"
+import { api } from "../../../../convex/_generated/api"
+import { useEffect, useState } from "react"
+import axios from "axios"
+
+
+function getRandomChars(input, length = 5) {
+  let result = '';
+  const characters = input;
+  for (let i = 0; i < length; i++) {
+    const randIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randIndex];
+  }
+  return result;
+}
+
+function formatRelativeDate(timestamp) {
+  const now = new Date();
+  const date = new Date(timestamp);
+  
+  // Remove time part for both dates to get clean day differences
+  const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const diffInDays = Math.round((dateMidnight - nowMidnight) / msPerDay);
+
+  if (diffInDays === 0) return "today";
+  if (diffInDays === 1) return "tomorrow";
+  if (diffInDays === -1) return "yesterday";
+
+  if (diffInDays > 1) return `in ${diffInDays} days`;
+  if (diffInDays < -1) return `${Math.abs(diffInDays)} days ago`;
+}
+
 
 export default function RiderDashboard() {
+  const bookings = useQuery(api.order.fetchTasks)
+  const [usersFound,setUsersFound] = useState([])
+  useEffect(() => {
+      const dataFind = async () => {
+        const res = await axios.get('/api/user')
+        console.log(res?.data?.user.data);
+        setUsersFound(res?.data?.user.data)
+      }
+      dataFind()
+    },[])
+
+  if (bookings == undefined || usersFound.length < 1) return null
+
+  const pendingOrders = bookings?.filter(order => order.status !== "delivered");
+  const merged = pendingOrders.map(order => {
+    const user = usersFound.find(p => order.userId === p?.id);
+    return { ...user, ...order };
+  });
+
+  
   return (
     <div className="min-h-screen bg-muted/30 flex-1 overflow-y-auto px-4">
       <Header/>    
@@ -21,9 +76,9 @@ export default function RiderDashboard() {
       <Tabs className="py-6" defaultValue="dashboard">
          <TabsList className="mb-6">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="deliveries">Deliveries</TabsTrigger>
+            {/* <TabsTrigger value="deliveries">Deliveries</TabsTrigger>
             <TabsTrigger value="pickups">Pickups</TabsTrigger>                              
-            <TabsTrigger value="profile">Profile</TabsTrigger>            
+            <TabsTrigger value="profile">Profile</TabsTrigger>             */}
           </TabsList>
 
           <TabsContent value="dashboard">          
@@ -120,84 +175,30 @@ export default function RiderDashboard() {
                 </div>
 
                 <div className="space-y-4">
-                  <DeliveryCard
-                    orderId="ORD-2023-1236"
-                    customerName="Michael Omondi"
-                    address="789 River Rd, Nairobi"
-                    distance="3.8 km"
-                    time="11:30 AM - 12:30 PM"
-                    items={7}
-                    status="Scheduled"
-                    amount="KSh 3,200"
-                    paymentMethod="M-Pesa"
-                  />
+                  {merged.map((d) => {
+                    const timeStamp = formatRelativeDate(d._creationTime)
+                    const randomCh = getRandomChars(d._id)
+                    return (
+                      <DeliveryCard
+                        key={d._id}
+                        order_id={d._id}
+                        orderId={`ORD-${randomCh}`}
+                        customerName={d.emailAddresses[0].emailAddress}
+                        address={d.address}
+                        distance="3.8 km"
+                        time={d.pickupTime.length > 0 ? d.pickupTime : 'morning'}
+                        items={7}
+                        status={d.status}
+                        amount="KSh 3,200"
+                        paymentMethod="M-Pesa"
+                      />
+                    )
+                  })}
 
-                  <DeliveryCard
-                    orderId="ORD-2023-1238"
-                    customerName="David Mwangi"
-                    address="567 Valley Rd, Nairobi"
-                    distance="5.2 km"
-                    time="1:00 PM - 2:00 PM"
-                    items={10}
-                    status="Scheduled"
-                    amount="KSh 4,500"
-                    paymentMethod="Cash on Delivery"
-                  />
-
-                  <DeliveryCard
-                    orderId="ORD-2023-1240"
-                    customerName="James Kamau"
-                    address="123 Lake View, Nairobi"
-                    distance="4.1 km"
-                    time="3:30 PM - 4:30 PM"
-                    items={3}
-                    status="Scheduled"
-                    amount="KSh 1,500"
-                    paymentMethod="Card"
-                  />
+                  
                 </div>
               </div>
-
-              {/* Pickups */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">Today's Pickups</h2>
-                  <Button variant="ghost" size="sm" asChild>
-                    <a href="/rider/pickups">
-                      View All <ArrowRight className="ml-1 h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  <PickupCard
-                    customerName="Lucy Wanjiku"
-                    address="890 Mountain View, Nairobi"
-                    distance="2.7 km"
-                    time="10:00 AM - 11:00 AM"
-                    status="Completed"
-                    notes="Ring the bell twice, gate might be locked"
-                  />
-
-                  <PickupCard
-                    customerName="Priya Sharma"
-                    address="234 Hill St, Nairobi"
-                    distance="1.9 km"
-                    time="12:30 PM - 1:30 PM"
-                    status="Scheduled"
-                    notes="Call when arriving, customer has dogs"
-                  />
-
-                  <PickupCard
-                    customerName="Grace Wambui"
-                    address="234 Suburb St, Nairobi"
-                    distance="6.3 km"
-                    time="4:30 PM - 5:30 PM"
-                    status="Scheduled"
-                    notes="Apartment 4B, 3rd floor"
-                  />
-                </div>
-              </div>
+              
 
               {/* Quick Actions */}
               <Card>
@@ -231,9 +232,9 @@ export default function RiderDashboard() {
               </Card>
             </div>
           </TabsContent>
-          <TabsContent value="deliveries"><RiderDeliveries/></TabsContent>
+          {/* <TabsContent value="deliveries"><RiderDeliveries/></TabsContent>
           <TabsContent value="pickups"><RiderPickups/></TabsContent>          
-          <TabsContent value="profile"><RiderProfile/></TabsContent>
+          <TabsContent value="profile"><RiderProfile/></TabsContent> */}
       </Tabs>
     </div>
   )

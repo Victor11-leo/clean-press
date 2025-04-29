@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
+import {handlePayment} from '@/lib/onboarding'
 import {Clock,     
   Shirt,  
   Star,  
@@ -18,14 +18,44 @@ import { api } from "../../../../convex/_generated/api"
 import Header from "@/components/global/Header"
 
 
+function getRandomChars(input, length = 5) {
+  let result = '';
+  const characters = input;
+  for (let i = 0; i < length; i++) {
+    const randIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randIndex];
+  }
+  return result;
+}
+
+function formatRelativeDate(timestamp) {
+  const now = new Date();
+  const date = new Date(timestamp);
+  
+  // Remove time part for both dates to get clean day differences
+  const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const diffInDays = Math.round((dateMidnight - nowMidnight) / msPerDay);
+
+  if (diffInDays === 0) return "today";
+  if (diffInDays === 1) return "tomorrow";
+  if (diffInDays === -1) return "yesterday";
+
+  if (diffInDays > 1) return `in ${diffInDays} days`;
+  if (diffInDays < -1) return `${Math.abs(diffInDays)} days ago`;
+}
+
 
 export default function DashboardPage() {
   const bookings = useQuery(api.order.fetchTasks)
+  const {user} = useUser()
   
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
   console.log(bookings);
-  if (bookings == undefined) return null
+  if (bookings == undefined || user == undefined) return null
 
   const pendingOrders = bookings?.filter(order => order.status !== "delivered");
 
@@ -140,11 +170,14 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {pendingOrders.map((d) => (
+                        {pendingOrders.map((d) => {
+                          const timeStamp = formatRelativeDate(d._creationTime)
+                          const randomCh = getRandomChars(d._id)
+                          return (
                         <OrderCard
                           key={d._id}
-                          orderNumber={"ORD-2023-1234"}
-                          date="Today, 10:30 AM"
+                          orderNumber={`order-${randomCh}`}
+                          date={timeStamp}
                           status={d.status}
                           items={[
                             { name: "Shirts", quantity: d.shirts },
@@ -154,7 +187,7 @@ export default function DashboardPage() {
                           ]}
                           statusStep={0}
                         />
-                        ))}
+                        )})}
                         
                       </div>
                     </CardContent>
@@ -185,49 +218,50 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <OrderCard
-                      orderNumber="ORD-2023-1234"
-                      date="Today, 10:30 AM"
-                      status="In Progress"
-                      items={[
-                        { name: "Shirts", quantity: 5 },
-                        { name: "Pants", quantity: 3 },
-                        { name: "Bedsheets", quantity: 2 },
-                      ]}
-                      statusStep={2}
-                    />
-                    <OrderCard
-                      orderNumber="ORD-2023-1233"
-                      date="Yesterday, 2:15 PM"
-                      status="Ready for Delivery"
-                      items={[
-                        { name: "Shirts", quantity: 3 },
-                        { name: "Dresses", quantity: 2 },
-                      ]}
-                      statusStep={3}
-                    />
-                    <OrderCard
-                      orderNumber="ORD-2023-1232"
-                      date="Mar 22, 2023, 9:45 AM"
-                      status="Completed"
-                      items={[
-                        { name: "Shirts", quantity: 4 },
-                        { name: "Pants", quantity: 2 },
-                        { name: "Jackets", quantity: 1 },
-                      ]}
-                      statusStep={4}
-                    />
-                    <OrderCard
-                      orderNumber="ORD-2023-1231"
-                      date="Mar 18, 2023, 11:20 AM"
-                      status="Completed"
-                      items={[
-                        { name: "Shirts", quantity: 6 },
-                        { name: "Pants", quantity: 4 },
-                      ]}
-                      statusStep={4}
-                    />
+                  {pendingOrders.map((d) => {
+                          const timeStamp = formatRelativeDate(d._creationTime)
+                          const randomCh = getRandomChars(d._id)
+                          return (
+                        <OrderCard
+                          key={d._id}
+                          orderNumber={`order-${randomCh}`}
+                          date={timeStamp}
+                          status={d.status}
+                          items={[
+                            { name: "Shirts", quantity: d.shirts },
+                            { name: "Pants", quantity: d.pants },
+                            { name: "Bedsheets", quantity: d.bedding },
+                            { name: "Dresses", quantity: d.dresses },
+                          ]}
+                          statusStep={0}
+                        />
+                        )})}
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="subscription">
+              <Card>
+                <CardHeader>
+                  <CardTitle>My Subscription</CardTitle>
+                  <CardDescription>Currently on {user.publicMetadata.plan} plan, phone {user.publicMetadata.phone}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <Button
+                    onClick={() => handlePayment({
+                      phone:user.publicMetadata.phone,
+                      amount:1
+                    })}
+                    >Upgrade To weekly plan</Button>
+                    <Button
+                    onClick={() => handlePayment({
+                      phone:user.publicMetadata.phone,
+                      amount:1
+                    })}
+                    >Upgrade To family plan</Button>
+                  </div>
+                  
                 </CardContent>
               </Card>
             </TabsContent>
