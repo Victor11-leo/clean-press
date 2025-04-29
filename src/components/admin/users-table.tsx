@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { fetchAllUsers } from "@/lib/users"
-import { useEffect } from "react"
+import { useEffect,useState } from "react"
 import axios from "axios"
 
 interface UsersTableProps {
